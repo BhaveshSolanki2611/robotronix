@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+
+node_modules
+.next
+out
+coverage
+
+*.db
+*.sqlite
+*.sqlite3
+*.tsbuildinfo
+.codex-dev-server*.log
+
+heat_exchanger_refined_2.py
+sample image for heat exchanger.png
