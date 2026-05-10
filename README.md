@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Robotronix Web App
 
-## Getting Started
+Production website and lead-capture application for Robotronix and Scalability Technology Pvt. Ltd.
 
-First, run the development server:
+The app is built with Next.js App Router, React, Tailwind CSS, Prisma, and PostgreSQL. It includes marketing pages, solution and industry pages, contact/demo/career/newsletter submission APIs, a lightweight admin dashboard, and an in-browser heat-exchanger tube sheet analyzer.
+
+## Tech Stack
+
+- Next.js 16 App Router
+- React 19
+- Tailwind CSS 4
+- Prisma 7
+- PostgreSQL
+- GSAP, Framer Motion, Three.js, and Lucide icons
+
+## Environment Variables
+
+Create a local `.env` from `.env.example`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE"
+ADMIN_SECRET_KEY="replace-with-at-least-32-random-characters"
+NEXT_PUBLIC_SITE_URL="https://www.robotronix.in"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`DATABASE_URL` and `ADMIN_SECRET_KEY` are server-only secrets and must not be committed. In production, `ADMIN_SECRET_KEY` must be at least 32 characters.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Local Development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm ci
+npm run db:generate
+npm run db:migrate
+npm run dev
+```
 
-## Learn More
+Open `http://localhost:3000`.
 
-To learn more about Next.js, take a look at the following resources:
+## Production Checks
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run db:validate
+npm run db:generate
+npm run lint
+npm run build
+npm audit --omit=dev --audit-level=moderate
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Database
 
-## Deploy on Vercel
+The application uses Prisma migrations under `prisma/migrations`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For production or CI deploys:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run db:deploy
+```
+
+For local schema iteration:
+
+```bash
+npm run db:migrate
+```
+
+## Deployment
+
+The app is ready for Vercel. Configure the project with these production environment variables:
+
+- `DATABASE_URL`
+- `ADMIN_SECRET_KEY`
+- `NEXT_PUBLIC_SITE_URL`
+
+Then deploy:
+
+```bash
+npm run db:deploy
+vercel deploy --prod
+```
+
+## Security Notes
+
+- `.env`, local databases, logs, and build artifacts are ignored.
+- Prisma routes run on the Node.js runtime.
+- Public form APIs validate and trim submitted input before writing to the database.
+- Admin data APIs require a signed HTTP-only session cookie.
+- The project does not include an open-source license by default.
