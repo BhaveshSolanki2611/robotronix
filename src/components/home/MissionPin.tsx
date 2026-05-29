@@ -66,46 +66,48 @@ export default function MissionPin() {
   }, []);
 
   return (
-    <div
-      ref={sectionRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%)",
-        backgroundSize: "200% 200%",
-        animation: "gradient-shift 8s ease infinite",
-      }}
-    >
-      {/* Progress line on left */}
-      <div className="absolute left-8 lg:left-16 top-1/2 -translate-y-1/2 w-px h-48 bg-border">
-        <div
-          ref={progressRef}
-          className="w-full bg-accent origin-top"
-          style={{ height: "100%", transform: "scaleY(0)" }}
-        />
-      </div>
-
-      {/* Text container */}
-      <div className="relative container-wide text-center">
-        {statements.map((text, i) => (
+    <section className="w-full">
+      <div
+        ref={sectionRef}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%)",
+          backgroundSize: "200% 200%",
+          animation: "gradient-shift 8s ease infinite",
+        }}
+      >
+        {/* Progress line on left */}
+        <div className="absolute left-8 lg:left-16 top-1/2 -translate-y-1/2 w-px h-48 bg-border">
           <div
-            key={i}
-            ref={(el) => { if (el) textsRef.current[i] = el; }}
-            className={`${i === 0 ? "" : "absolute inset-0 flex items-center justify-center"}`}
-          >
-            <h2
-              className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold max-w-5xl mx-auto glow-cyan leading-tight"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {text}
-            </h2>
-          </div>
-        ))}
-      </div>
+            ref={progressRef}
+            className="w-full bg-accent origin-top"
+            style={{ height: "100%", transform: "scaleY(0)" }}
+          />
+        </div>
 
-      {/* Subtle geometric decoration */}
-      <div className="absolute right-8 lg:right-16 top-1/2 -translate-y-1/2">
-        <div className="w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
+        {/* Text container */}
+        <div className="relative container-wide text-center">
+          {statements.map((text, i) => (
+            <div
+              key={i}
+              ref={(el) => { if (el) textsRef.current[i] = el; }}
+              className={`${i === 0 ? "" : "absolute inset-0 flex items-center justify-center"}`}
+            >
+              <h2
+                className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold max-w-5xl mx-auto glow-cyan leading-tight"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {text}
+              </h2>
+            </div>
+          ))}
+        </div>
+
+        {/* Subtle geometric decoration */}
+        <div className="absolute right-8 lg:right-16 top-1/2 -translate-y-1/2">
+          <div className="w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

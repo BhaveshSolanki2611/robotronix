@@ -12,6 +12,8 @@ import NewsSection from "@/components/home/NewsSection";
 import CareersCTA from "@/components/home/CareersCTA";
 import ContactCTA from "@/components/home/ContactCTA";
 
+
+
 // Heavy components - lazy load (ssr: false needs "use client")
 const MissionPin = dynamic(() => import("@/components/home/MissionPin"), { ssr: false });
 const HowItWorks = dynamic(() => import("@/components/home/HowItWorks"), { ssr: false });

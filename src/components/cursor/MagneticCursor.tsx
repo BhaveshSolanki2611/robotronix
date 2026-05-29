@@ -73,8 +73,8 @@ export default function MagneticCursor() {
         setCursorState((prev) => ({ ...prev, isHovering: true }));
         if (auraRef.current) {
           gsap.to(auraRef.current, {
-            width: 80,
-            height: 80,
+            width: 50,
+            height: 50,
             duration: 0.3,
             ease: "power2.out",
           });
@@ -91,8 +91,8 @@ export default function MagneticCursor() {
         setCursorState((prev) => ({ ...prev, isHovering: false, text: "" }));
         if (auraRef.current) {
           gsap.to(auraRef.current, {
-            width: 60,
-            height: 60,
+            width: 50,
+            height: 50,
             duration: 0.3,
             ease: "elastic.out(1, 0.3)",
           });
@@ -181,8 +181,8 @@ export default function MagneticCursor() {
         ref={auraRef}
         className="fixed top-0 left-0 rounded-full border transition-colors duration-300"
         style={{
-          width: cursorState.isHovering ? 80 : 60,
-          height: cursorState.isHovering ? 80 : 60,
+          width: cursorState.isHovering ? 70 : 50,
+          height: cursorState.isHovering ? 70 : 50,
           borderColor: cursorState.isHovering
             ? "rgba(0, 212, 255, 0.6)"
             : "rgba(0, 212, 255, 0.2)",

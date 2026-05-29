@@ -33,6 +33,28 @@ export default function TextReveal({
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const originalRemoveChild = el.removeChild.bind(el);
+    el.removeChild = function <T extends Node>(child: T): T {
+      try {
+        return originalRemoveChild(child);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "NotFoundError") {
+          // Bypassed text-node unmounting mismatch due to GSAP splitting
+          return child;
+        }
+        throw err;
+      }
+    };
+
+    return () => {
+      el.removeChild = originalRemoveChild;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!ref.current || reducedMotion) return;
 
     const el = ref.current;

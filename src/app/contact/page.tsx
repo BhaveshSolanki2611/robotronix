@@ -107,7 +107,7 @@ export default function Page() {
             <div className="lg:col-span-2 space-y-6">
               {[
                 { icon: MapPin, title: "Office", lines: ["Robotronix and Scalability Technology Pvt. Ltd.", "Gurgaon, Haryana 122011", "India"], link: { text: "Get Directions →", href: "https://www.bing.com/maps?where=Gurgaon%2C%20Haryana%20122011%2C%20IN" } },
-                { icon: Mail, title: "Email", lines: ["info@robotronix.in", "careers@robotronix.in"] },
+                { icon: Mail, title: "Email", lines: ["contact-us@rast.in", "careers@robotronix.in"] },
                 { icon: Phone, title: "Phone", lines: ["+91 XXXXX XXXXX"] },
                 { icon: Clock, title: "Working Hours", lines: ["Monday – Friday: 9:00 AM – 6:00 PM IST", "Saturday: 10:00 AM – 2:00 PM IST"] },
               ].map((info) => (

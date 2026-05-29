@@ -83,13 +83,13 @@ export default function Page() {
         <div className="container-wide">
           <h2 className="text-3xl lg:text-4xl font-bold mb-12 text-center" style={{ fontFamily: "var(--font-display)" }}>Our Journey</h2>
           <div className="max-w-3xl mx-auto relative">
-            <div className="absolute left-8 top-0 bottom-0 w-px" style={{ backgroundColor: "var(--border)" }} />
+            <div className="absolute left-20 top-0 bottom-0 w-px" style={{ backgroundColor: "var(--border)" }} />
             {timeline.map((t) => (
               <div key={t.year} className="flex gap-8 mb-10 relative">
-                <div className="shrink-0 w-16 text-right">
+                <div className="shrink-0 w-24 ml-7">
                   <span className="text-sm font-bold text-accent" style={{ fontFamily: "var(--font-display)" }}>{t.year}</span>
                 </div>
-                <div className="absolute left-[30px] top-1.5 w-3 h-3 rounded-full bg-accent border-2" style={{ borderColor: "var(--bg-primary)" }} />
+                <div className="absolute left-[75px] top-1.5 w-3 h-3 rounded-full bg-accent border-2" style={{ borderColor: "var(--bg-primary)" }} />
                 <div className="pb-2">
                   <h3 className="font-bold mb-1" style={{ fontFamily: "var(--font-display)" }}>{t.title}</h3>
                   <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{t.desc}</p>

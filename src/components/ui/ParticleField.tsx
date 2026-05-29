@@ -113,11 +113,38 @@ export default function ParticleField({ className }: { className?: string }) {
   const isMobile = useIsMobile();
   const reducedMotion = useReducedMotion();
   const count = isMobile ? 400 : 1500;
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Save the original removeChild
+    const originalRemoveChild = container.removeChild.bind(container);
+
+    // Override removeChild to safely catch and ignore NotFoundErrors during unmounting
+    container.removeChild = function <T extends Node>(child: T): T {
+      try {
+        return originalRemoveChild(child);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "NotFoundError") {
+          // Bypassed double-removal error from R3F & React reconciler race condition
+          return child;
+        }
+        throw err;
+      }
+    };
+
+    return () => {
+      // Restore original removeChild on cleanup
+      container.removeChild = originalRemoveChild;
+    };
+  }, []);
 
   if (reducedMotion) return null;
 
   return (
-    <div className={className} style={{ position: "absolute", inset: 0 }}>
+    <div ref={containerRef} className={className} style={{ position: "absolute", inset: 0 }}>
       <Canvas
         camera={{ position: [0, 0, 6], fov: 75 }}
         dpr={[1, 1.5]}
@@ -129,3 +156,4 @@ export default function ParticleField({ className }: { className?: string }) {
     </div>
   );
 }
+

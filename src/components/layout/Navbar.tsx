@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "@/lib/gsap";
-import { Menu, X, ChevronDown, Bot, Mountain, FlaskConical, Scan, Zap, Droplets, Building2, Shield, Wrench, Gauge } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronLeft, ChevronRight, Briefcase, Bot, Mountain, FlaskConical, Scan, Zap, Droplets, Building2, Shield, Wrench, Gauge, Info, ScrollText, Mail, Send, CheckCircle2 } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
 
 const solutions = [
@@ -27,15 +27,42 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [activeMega, setActiveMega] = useState<string | null>(null);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [currentMenu, setCurrentMenu] = useState<"main" | "products" | "industries" | "about">("main");
   const navRef = useRef<HTMLElement>(null);
   const megaRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    setNewsletterLoading(true);
+    try {
+      await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+      setNewsletterSubscribed(true);
+      setNewsletterEmail("");
+    } catch { /* silent */ } finally {
+      setNewsletterLoading(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!isMobileOpen) {
+      setCurrentMenu("main");
+    }
+  }, [isMobileOpen]);
 
   useEffect(() => {
     if (isMobileOpen && mobileMenuRef.current) {
@@ -73,14 +100,9 @@ export default function Navbar() {
       >
         <div className="container-wide flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group glitch" data-cursor-text="HOME">
-            <div className="w-10 h-10 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center group-hover:border-accent transition-colors">
-              <span className="text-accent font-bold text-sm" style={{ fontFamily: 'var(--font-display)' }}>RST</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight hidden sm:block" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
-              ROBOTRONIX
-            </span>
-          </Link>
+          <a href="/" className="flex items-center gap-3 group glitch" data-cursor-text="HOME">
+            <img src="/logo.png" alt="RAST" className=" h-[52px] flex items-center justify-center text-[#101a18] bg-white rounded-[6px] p-[2px] drop-shadow-[0_0_12px_rgba(34,211,238,0.45)]"  />
+          </a>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-8">
@@ -91,7 +113,7 @@ export default function Navbar() {
             >
               <button className="flex items-center gap-1 text-sm font-medium text-text-secondary hover:text-accent transition-colors"
                 style={{ fontFamily: 'var(--font-body)' }} suppressHydrationWarning>
-                Solutions <ChevronDown size={14} className={`transition-transform ${activeMega === "solutions" ? "rotate-180" : ""}`} />
+                Products <ChevronDown size={14} className={`transition-transform ${activeMega === "solutions" ? "rotate-180" : ""}`} />
               </button>
 
               {activeMega === "solutions" && (
@@ -147,15 +169,42 @@ export default function Navbar() {
               )}
             </div>
 
-            <Link href="/platform" className="text-sm font-medium text-text-secondary hover:text-accent transition-colors">
-              Platform
+            <Link href="/blogs" className="text-sm font-medium text-text-secondary hover:text-accent transition-colors">
+              Blogs
             </Link>
-            <Link href="/patents" className="text-sm font-medium text-text-secondary hover:text-accent transition-colors">
-              Patents
-            </Link>
-            <Link href="/about" className="text-sm font-medium text-text-secondary hover:text-accent transition-colors">
-              About
-            </Link>
+            <div
+              className="relative"
+              onMouseEnter={() => handleMegaEnter("about")}
+              onMouseLeave={handleMegaLeave}
+            >
+              <button className="flex items-center gap-1 text-sm font-medium text-text-secondary hover:text-accent transition-colors"
+                style={{ fontFamily: 'var(--font-body)' }} suppressHydrationWarning>
+                About <ChevronDown size={14} className={`transition-transform ${activeMega === "about" ? "rotate-180" : ""}`} />
+              </button>
+
+              {activeMega === "about" && (
+                <div ref={megaRef} className="absolute top-full right-0 pt-4 w-[220px]">
+                  <div className="glass-strong rounded-2xl p-4 flex flex-col gap-1">
+                    <Link
+                      href="/about"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/5 transition-colors group/item"
+                      data-cursor-text="VIEW"
+                    >
+                      <Info size={18} className="text-accent" />
+                      <span className="text-sm font-medium text-text-secondary group-hover/item:text-text-primary transition-colors">About Us</span>
+                    </Link>
+                    <Link
+                      href="/patents"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/5 transition-colors group/item"
+                      data-cursor-text="VIEW"
+                    >
+                      <ScrollText size={18} className="text-accent" />
+                      <span className="text-sm font-medium text-text-secondary group-hover/item:text-text-primary transition-colors">Research & development</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* CTAs */}
@@ -183,34 +232,287 @@ export default function Navbar() {
       {isMobileOpen && (
         <div
           ref={mobileMenuRef}
-          className="fixed inset-0 z-[999] bg-bg-primary/98 backdrop-blur-xl flex flex-col justify-center px-8"
-          style={{ paddingTop: "80px" }}
+          className="fixed inset-0 z-[999] bg-bg-primary/98 backdrop-blur-xl flex flex-col"
+          style={{ paddingTop: "90px" }}
         >
-          <div className="space-y-6">
-            {[
-              { label: "Solutions", href: "/solutions/confined-spaces" },
-              { label: "Industries", href: "/industries/oil-gas" },
-              { label: "Platform", href: "/platform" },
-              { label: "Patents", href: "/patents" },
-              { label: "About", href: "/about" },
-              { label: "Careers", href: "/careers" },
-              { label: "Contact", href: "/contact" },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="mobile-link block text-4xl font-bold text-text-primary hover:text-accent transition-colors"
-                style={{ fontFamily: "var(--font-display)" }}
-                onClick={() => setIsMobileOpen(false)}
+          {/* Menu wrapper and panel transitions */}
+          <div className="relative flex-1 overflow-hidden w-full">
+            
+            {/* MAIN PANEL */}
+            <div
+              className={`absolute inset-0 transition-all duration-300 ease-in-out flex flex-col justify-between overflow-y-auto px-6 pb-24 ${
+                currentMenu === "main"
+                  ? "translate-x-0 opacity-100 pointer-events-auto"
+                  : "-translate-x-full opacity-0 pointer-events-none"
+              }`}
+            >
+              <div className="space-y-4">
+                {/* Products Trigger */}
+                <button
+                  onClick={() => setCurrentMenu("products")}
+                  className="mobile-link w-full flex items-center justify-between text-3xl font-bold text-text-primary hover:text-accent transition-colors text-left py-2.5 border-b border-border/20"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  <span>Products</span>
+                  <ChevronRight size={24} className="text-accent" />
+                </button>
+
+                {/* Industries Trigger */}
+                <button
+                  onClick={() => setCurrentMenu("industries")}
+                  className="mobile-link w-full flex items-center justify-between text-3xl font-bold text-text-primary hover:text-accent transition-colors text-left py-2.5 border-b border-border/20"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  <span>Industries</span>
+                  <ChevronRight size={24} className="text-accent" />
+                </button>
+
+                {/* Platform Link */}
+                {/* <Link
+                  href="/platform"
+                  className="mobile-link block text-3xl font-bold text-text-primary hover:text-accent transition-colors py-2.5 border-b border-border/20"
+                  style={{ fontFamily: "var(--font-display)" }}
+                  onClick={() => setIsMobileOpen(false)}
+                >
+                  Platform
+                </Link> */}
+
+                {/* Blogs Link */}
+                <Link
+                  href="/blogs"
+                  className="mobile-link block text-3xl font-bold text-text-primary hover:text-accent transition-colors py-2.5 border-b border-border/20"
+                  style={{ fontFamily: "var(--font-display)" }}
+                  onClick={() => setIsMobileOpen(false)}
+                >
+                  Blogs
+                </Link>
+
+                {/* About Trigger */}
+                <button
+                  onClick={() => setCurrentMenu("about")}
+                  className="mobile-link w-full flex items-center justify-between text-3xl font-bold text-text-primary hover:text-accent transition-colors text-left py-2.5 border-b border-border/20"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  <span>About</span>
+                  <ChevronRight size={24} className="text-accent" />
+                </button>
+
+                {/* Contact Link */}
+                <Link
+                  href="/contact"
+                  className="mobile-link block text-3xl font-bold text-text-primary hover:text-accent transition-colors py-2.5"
+                  style={{ fontFamily: "var(--font-display)" }}
+                  onClick={() => setIsMobileOpen(false)}
+                >
+                  Contact
+                </Link>
+              </div>
+
+              {/* Bottom Actions inside Main Panel */}
+              <div className="mt-8 space-y-6">
+                
+                {/* Newsletter Subscription */}
+                <div className="border-t border-border/20 pt-6">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-3 flex items-center gap-2">
+                    <Mail size={14} className="text-accent" />
+                    Subscribe to newsletter
+                  </h4>
+                  {newsletterSubscribed ? (
+                    <div className="flex items-center gap-2 text-sm text-accent py-2 bg-accent/5 px-4 rounded-xl border border-accent/20 animate-fade-in">
+                      <CheckCircle2 size={16} />
+                      <span>Thank you! You have subscribed.</span>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+                      <input
+                        type="email"
+                        value={newsletterEmail}
+                        onChange={(e) => setNewsletterEmail(e.target.value)}
+                        placeholder="Enter email address"
+                        required
+                        className="flex-1 rounded-xl px-4 py-3 text-sm outline-none bg-bg-card border border-border text-text-primary placeholder:text-text-muted focus:border-accent transition-colors"
+                        suppressHydrationWarning
+                      />
+                      <button
+                        type="submit"
+                        disabled={newsletterLoading}
+                        className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center hover:bg-accent/20 active:bg-accent/30 transition-colors text-accent shrink-0"
+                        suppressHydrationWarning
+                      >
+                        <Send size={16} />
+                      </button>
+                    </form>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <MagneticButton variant="filled" size="lg" href="/demo">
+                    Get Demo →
+                  </MagneticButton>
+                </div>
+                <div className="text-center text-xs text-text-muted">
+                  RAST © {new Date().getFullYear()} • Robotic Systems & Technologies
+                </div>
+              </div>
+            </div>
+
+            {/* PRODUCTS SUBMENU PANEL */}
+            <div
+              className={`absolute inset-0 transition-all duration-300 ease-in-out flex flex-col overflow-y-auto px-6 pb-24 ${
+                currentMenu === "products"
+                  ? "translate-x-0 opacity-100 pointer-events-auto"
+                  : "translate-x-full opacity-0 pointer-events-none"
+              }`}
+            >
+              <button
+                onClick={() => setCurrentMenu("main")}
+                className="flex items-center gap-2 text-text-secondary hover:text-accent text-sm font-medium mb-6 uppercase tracking-wider text-left w-fit transition-colors"
               >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-          <div className="mt-12 flex gap-4">
-            <MagneticButton variant="filled" size="lg" href="/demo">
-              Get Demo →
-            </MagneticButton>
+                <ChevronLeft size={16} /> Back to Menu
+              </button>
+
+              <h3 className="text-2xl font-bold text-text-primary mb-6" style={{ fontFamily: "var(--font-display)" }}>
+                Our Solutions
+              </h3>
+
+              <div className="space-y-3">
+                {solutions.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-start gap-4 p-4 rounded-xl border border-border/30 bg-bg-card/30 hover:bg-accent/5 active:bg-accent/10 transition-all group"
+                    onClick={() => setIsMobileOpen(false)}
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                      <item.icon size={20} className="text-accent" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors">
+                        {item.title}
+                      </div>
+                      <div className="text-xs text-text-muted mt-1 leading-relaxed">
+                        {item.desc}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* INDUSTRIES SUBMENU PANEL */}
+            <div
+              className={`absolute inset-0 transition-all duration-300 ease-in-out flex flex-col overflow-y-auto px-6 pb-24 ${
+                currentMenu === "industries"
+                  ? "translate-x-0 opacity-100 pointer-events-auto"
+                  : "translate-x-full opacity-0 pointer-events-none"
+              }`}
+            >
+              <button
+                onClick={() => setCurrentMenu("main")}
+                className="flex items-center gap-2 text-text-secondary hover:text-accent text-sm font-medium mb-6 uppercase tracking-wider text-left w-fit transition-colors"
+              >
+                <ChevronLeft size={16} /> Back to Menu
+              </button>
+
+              <h3 className="text-2xl font-bold text-text-primary mb-6" style={{ fontFamily: "var(--font-display)" }}>
+                Industries We Serve
+              </h3>
+
+              <div className="grid grid-cols-2 gap-3">
+                {industries.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex flex-col items-center justify-center gap-3 p-5 rounded-xl border border-border/30 bg-bg-card/30 hover:bg-accent/5 active:bg-accent/10 transition-all text-center group"
+                    onClick={() => setIsMobileOpen(false)}
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                      <item.icon size={22} className="text-accent" />
+                    </div>
+                    <span className="text-xs font-semibold text-text-secondary group-hover:text-text-primary transition-colors leading-tight">
+                      {item.title}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* ABOUT SUBMENU PANEL */}
+            <div
+              className={`absolute inset-0 transition-all duration-300 ease-in-out flex flex-col overflow-y-auto px-6 pb-24 ${
+                currentMenu === "about"
+                  ? "translate-x-0 opacity-100 pointer-events-auto"
+                  : "translate-x-full opacity-0 pointer-events-none"
+              }`}
+            >
+              <button
+                onClick={() => setCurrentMenu("main")}
+                className="flex items-center gap-2 text-text-secondary hover:text-accent text-sm font-medium mb-6 uppercase tracking-wider text-left w-fit transition-colors"
+              >
+                <ChevronLeft size={16} /> Back to Menu
+              </button>
+
+              <h3 className="text-2xl font-bold text-text-primary mb-6" style={{ fontFamily: "var(--font-display)" }}>
+                Company Info
+              </h3>
+
+              <div className="space-y-3">
+                <Link
+                  href="/about"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-border/30 bg-bg-card/30 hover:bg-accent/5 active:bg-accent/10 transition-all group"
+                  onClick={() => setIsMobileOpen(false)}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                    <Info size={20} className="text-accent" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors block">
+                      About Us
+                    </span>
+                    <span className="text-xs text-text-muted mt-0.5 block">
+                      Who we are and our mission
+                    </span>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/patents"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-border/30 bg-bg-card/30 hover:bg-accent/5 active:bg-accent/10 transition-all group"
+                  onClick={() => setIsMobileOpen(false)}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                    <ScrollText size={20} className="text-accent" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors block">
+                      Research & development
+                    </span>
+                    <span className="text-xs text-text-muted mt-0.5 block">
+                      Our proprietary engineering and technology
+                    </span>
+                  </div>
+                </Link>
+
+                {/* <Link
+                  href="/careers"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-border/30 bg-bg-card/30 hover:bg-accent/5 active:bg-accent/10 transition-all group"
+                  onClick={() => setIsMobileOpen(false)}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                    <Briefcase size={20} className="text-accent" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors block">
+                      Careers
+                    </span>
+                    <span className="text-xs text-text-muted mt-0.5 block">
+                      Join our team and build the future of robotics
+                    </span>
+                  </div>
+                </Link> */}
+              </div>
+            </div>
+
           </div>
         </div>
       )}

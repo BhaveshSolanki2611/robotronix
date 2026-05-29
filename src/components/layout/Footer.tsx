@@ -16,14 +16,14 @@ const footerLinks = {
     { label: "Oil & Gas", href: "/industries/oil-gas" },
     { label: "Power Plants", href: "/industries/power" },
     { label: "Petrochemical", href: "/industries/petrochemical" },
-    { label: "Infrastructure", href: "/industries/infrastructure" },
+    { label: "Wind Energy", href: "/industries/infrastructure" },
     { label: "Defence", href: "/industries/defence" },
-    { label: "Manufacturing", href: "/industries/manufacturing" },
+    { label: "Hydroelectric", href: "/industries/manufacturing" },
   ],
   company: [
     { label: "About Us", href: "/about" },
-    { label: "Patents", href: "/patents" },
-    { label: "Careers", href: "/careers" },
+    { label: "Research & development", href: "/patents" },
+    // { label: "Careers", href: "/careers" },
     { label: "News & Press", href: "/news" },
     { label: "Case Studies", href: "/case-studies" },
     { label: "Contact", href: "/contact" },
@@ -76,14 +76,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center">
-                <span className="text-accent font-bold text-sm" style={{ fontFamily: "var(--font-display)" }}>RST</span>
-              </div>
-              <span className="text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>
-                ROBOTRONIX
-              </span>
-            </Link>
+            <a href="/" className="inline-flex items-center gap-3 group">
+              <img src="/logo.png" alt="RAST" className=" h-[52px] flex items-center justify-center text-[#101a18] bg-white rounded-[6px] p-[2px] drop-shadow-[0_0_12px_rgba(34,211,238,0.45)]"  />
+            </a>
             <p className="mt-4 text-sm text-text-secondary leading-relaxed">
               Made in India for the World. Patent-granted robotics for hazardous environments.
             </p>
@@ -118,10 +113,10 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Solutions */}
+          {/* Products */}
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wider text-text-primary mb-5" style={{ fontFamily: "var(--font-display)" }}>
-              Solutions
+              Products
             </h4>
             <ul className="space-y-3">
               {footerLinks.solutions.map((link) => (
@@ -185,7 +180,13 @@ export default function Footer() {
 
           <div className="flex items-center gap-2">
             <Mail size={12} />
-            <span>info@robotronix.in</span>
+            
+            <a 
+              href="mailto:contact-us@rast.in"
+              className="hover:text-accent transition-colors"
+              >contact-us@rast.in
+            </a>
+            
           </div>
 
           <div className="flex items-center gap-4">
