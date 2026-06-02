@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "@/lib/gsap";
-import { Menu, X, ChevronDown, ChevronLeft, ChevronRight, Briefcase, Bot, Mountain, FlaskConical, Scan, Zap, Droplets, Building2, Shield, Wrench, Gauge, Info, ScrollText, Mail, Send, CheckCircle2 } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronLeft, ChevronRight, Bot, Mountain, FlaskConical, Scan, Zap, Droplets, Building2, Shield, Wrench, Gauge, Info, ScrollText, Mail, Send, CheckCircle2 } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
 
 const solutions = [
@@ -30,6 +31,7 @@ export default function Navbar() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [newsletterError, setNewsletterError] = useState("");
   const [currentMenu, setCurrentMenu] = useState<"main" | "products" | "industries" | "about">("main");
   const navRef = useRef<HTMLElement>(null);
   const megaRef = useRef<HTMLDivElement>(null);
@@ -39,17 +41,31 @@ export default function Navbar() {
     e.preventDefault();
     if (!newsletterEmail) return;
     setNewsletterLoading(true);
+    setNewsletterError("");
     try {
-      await fetch("/api/newsletter", {
+      const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: newsletterEmail }),
       });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Unable to subscribe.");
+      }
+
       setNewsletterSubscribed(true);
       setNewsletterEmail("");
-    } catch { /* silent */ } finally {
+    } catch (error) {
+      setNewsletterError(error instanceof Error ? error.message : "Unable to subscribe.");
+    } finally {
       setNewsletterLoading(false);
     }
+  };
+
+  const closeMobileMenu = () => {
+    setCurrentMenu("main");
+    setIsMobileOpen(false);
   };
 
   useEffect(() => {
@@ -57,12 +73,6 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  useEffect(() => {
-    if (!isMobileOpen) {
-      setCurrentMenu("main");
-    }
-  }, [isMobileOpen]);
 
   useEffect(() => {
     if (isMobileOpen && mobileMenuRef.current) {
@@ -100,9 +110,9 @@ export default function Navbar() {
       >
         <div className="container-wide flex items-center justify-between h-20">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-3 group glitch" data-cursor-text="HOME">
-            <img src="/logo.png" alt="RAST" className=" h-[52px] flex items-center justify-center text-[#101a18] bg-white rounded-[6px] p-[2px] drop-shadow-[0_0_12px_rgba(34,211,238,0.45)]"  />
-          </a>
+          <Link href="/" className="flex items-center gap-3 group glitch" data-cursor-text="HOME">
+            <Image src="/logo.png" alt="RAST" width={160} height={52} className="h-[52px] w-auto flex items-center justify-center text-[#101a18] bg-white rounded-[6px] p-[2px] drop-shadow-[0_0_12px_rgba(34,211,238,0.45)]" />
+          </Link>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-8">
@@ -170,7 +180,7 @@ export default function Navbar() {
             </div>
 
             <Link href="/blogs" className="text-sm font-medium text-text-secondary hover:text-accent transition-colors">
-              Blogs
+              About Us
             </Link>
             <div
               className="relative"
@@ -179,7 +189,7 @@ export default function Navbar() {
             >
               <button className="flex items-center gap-1 text-sm font-medium text-text-secondary hover:text-accent transition-colors"
                 style={{ fontFamily: 'var(--font-body)' }} suppressHydrationWarning>
-                About <ChevronDown size={14} className={`transition-transform ${activeMega === "about" ? "rotate-180" : ""}`} />
+                Blogs <ChevronDown size={14} className={`transition-transform ${activeMega === "about" ? "rotate-180" : ""}`} />
               </button>
 
               {activeMega === "about" && (
@@ -191,7 +201,7 @@ export default function Navbar() {
                       data-cursor-text="VIEW"
                     >
                       <Info size={18} className="text-accent" />
-                      <span className="text-sm font-medium text-text-secondary group-hover/item:text-text-primary transition-colors">About Us</span>
+                      <span className="text-sm font-medium text-text-secondary group-hover/item:text-text-primary transition-colors">Blogs</span>
                     </Link>
                     <Link
                       href="/patents"
@@ -220,7 +230,7 @@ export default function Navbar() {
           {/* Mobile hamburger */}
           <button
             className="lg:hidden text-text-primary p-2"
-            onClick={() => setIsMobileOpen(!isMobileOpen)}
+            onClick={() => (isMobileOpen ? closeMobileMenu() : setIsMobileOpen(true))}
             aria-label="Toggle menu"
           >
             {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -272,28 +282,28 @@ export default function Navbar() {
                   href="/platform"
                   className="mobile-link block text-3xl font-bold text-text-primary hover:text-accent transition-colors py-2.5 border-b border-border/20"
                   style={{ fontFamily: "var(--font-display)" }}
-                  onClick={() => setIsMobileOpen(false)}
+                  onClick={closeMobileMenu}
                 >
                   Platform
                 </Link> */}
 
-                {/* Blogs Link */}
+                {/* About Us Link */}
                 <Link
                   href="/blogs"
                   className="mobile-link block text-3xl font-bold text-text-primary hover:text-accent transition-colors py-2.5 border-b border-border/20"
                   style={{ fontFamily: "var(--font-display)" }}
-                  onClick={() => setIsMobileOpen(false)}
+                  onClick={closeMobileMenu}
                 >
-                  Blogs
+                  About Us
                 </Link>
 
-                {/* About Trigger */}
+                {/* Blogs Trigger */}
                 <button
                   onClick={() => setCurrentMenu("about")}
                   className="mobile-link w-full flex items-center justify-between text-3xl font-bold text-text-primary hover:text-accent transition-colors text-left py-2.5 border-b border-border/20"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
-                  <span>About</span>
+                  <span>Blogs</span>
                   <ChevronRight size={24} className="text-accent" />
                 </button>
 
@@ -343,6 +353,7 @@ export default function Navbar() {
                       </button>
                     </form>
                   )}
+                  {newsletterError && <p className="mt-2 text-xs text-red-400">{newsletterError}</p>}
                 </div>
 
                 <div className="flex flex-col gap-3">
@@ -381,7 +392,7 @@ export default function Navbar() {
                     key={item.href}
                     href={item.href}
                     className="flex items-start gap-4 p-4 rounded-xl border border-border/30 bg-bg-card/30 hover:bg-accent/5 active:bg-accent/10 transition-all group"
-                    onClick={() => setIsMobileOpen(false)}
+                    onClick={closeMobileMenu}
                   >
                     <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
                       <item.icon size={20} className="text-accent" />
@@ -424,7 +435,7 @@ export default function Navbar() {
                     key={item.href}
                     href={item.href}
                     className="flex flex-col items-center justify-center gap-3 p-5 rounded-xl border border-border/30 bg-bg-card/30 hover:bg-accent/5 active:bg-accent/10 transition-all text-center group"
-                    onClick={() => setIsMobileOpen(false)}
+                    onClick={closeMobileMenu}
                   >
                     <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
                       <item.icon size={22} className="text-accent" />
@@ -460,14 +471,14 @@ export default function Navbar() {
                 <Link
                   href="/about"
                   className="flex items-center gap-4 p-4 rounded-xl border border-border/30 bg-bg-card/30 hover:bg-accent/5 active:bg-accent/10 transition-all group"
-                  onClick={() => setIsMobileOpen(false)}
+                  onClick={closeMobileMenu}
                 >
                   <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
                     <Info size={20} className="text-accent" />
-                  </div>
-                  <div>
-                    <span className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors block">
-                      About Us
+                    </div>
+                    <div>
+                      <span className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors block">
+                      Blogs
                     </span>
                     <span className="text-xs text-text-muted mt-0.5 block">
                       Who we are and our mission
@@ -478,7 +489,7 @@ export default function Navbar() {
                 <Link
                   href="/patents"
                   className="flex items-center gap-4 p-4 rounded-xl border border-border/30 bg-bg-card/30 hover:bg-accent/5 active:bg-accent/10 transition-all group"
-                  onClick={() => setIsMobileOpen(false)}
+                  onClick={closeMobileMenu}
                 >
                   <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
                     <ScrollText size={20} className="text-accent" />

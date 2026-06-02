@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, ReactNode } from "react";
+import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { gsap } from "@/lib/gsap";
-import { splitTextIntoSpans } from "@/lib/splitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useReducedMotion } from "@/hooks/useMediaQuery";
 
@@ -18,6 +17,27 @@ interface TextRevealProps {
   triggerStart?: string;
 }
 
+function nodeToText(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(nodeToText).join("");
+
+  return "";
+}
+
+function splitText(text: string, splitType: TextRevealProps["splitType"]) {
+  if (splitType === "chars" || splitType === "both") {
+    return text.split("").map((char, index) => ({
+      key: `${char}-${index}`,
+      text: char === " " ? "\u00A0" : char,
+    }));
+  }
+
+  return text.split(/(\s+)/).map((part, index) => ({
+    key: `${part}-${index}`,
+    text: part.trim() ? part : "\u00A0",
+  }));
+}
+
 export default function TextReveal({
   children,
   className,
@@ -31,39 +51,18 @@ export default function TextReveal({
 }: TextRevealProps) {
   const ref = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
+  const text = useMemo(() => nodeToText(children), [children]);
+  const parts = useMemo(() => splitText(text, splitType), [text, splitType]);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    const targets = Array.from(el?.querySelectorAll<HTMLElement>("[data-text-reveal-part]") ?? []);
 
-    const originalRemoveChild = el.removeChild.bind(el);
-    el.removeChild = function <T extends Node>(child: T): T {
-      try {
-        return originalRemoveChild(child);
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "NotFoundError") {
-          // Bypassed text-node unmounting mismatch due to GSAP splitting
-          return child;
-        }
-        throw err;
-      }
-    };
-
-    return () => {
-      el.removeChild = originalRemoveChild;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!ref.current || reducedMotion) return;
-
-    const el = ref.current;
-    const split = splitTextIntoSpans(el, { type: splitType });
-    const targets = splitType === "chars" ? split.chars : split.words;
+    if (!el || reducedMotion || targets.length === 0) return;
 
     gsap.set(targets, { y, opacity: 0 });
 
-    const tl = gsap.to(targets, {
+    const tween = gsap.to(targets, {
       y: 0,
       opacity: 1,
       duration: 0.8,
@@ -78,18 +77,28 @@ export default function TextReveal({
     });
 
     return () => {
-      tl.kill();
+      tween.kill();
       ScrollTrigger.getAll().forEach((st) => {
         if (st.trigger === el) st.kill();
       });
-      split.revert();
     };
-  }, [reducedMotion, delay, stagger, y, splitType, triggerStart]);
+  }, [delay, reducedMotion, stagger, triggerStart, y, parts]);
 
   return (
     // @ts-expect-error dynamic tag
     <Tag ref={ref} className={className} style={style}>
-      {children}
+      {text
+        ? parts.map((part) => (
+            <span
+              key={part.key}
+              data-text-reveal-part
+              className="inline-block"
+              style={{ willChange: "transform, opacity" }}
+            >
+              {part.text}
+            </span>
+          ))
+        : children}
     </Tag>
   );
 }

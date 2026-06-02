@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma } from "@/lib/db";
 import { formatValidationError, newsletterSubscriptionSchema } from "@/lib/apiValidation";
+import { checkRateLimit, publicFormRateLimit, rateLimitedResponse } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
+    const limit = checkRateLimit(request, "newsletter-form", publicFormRateLimit);
+    if (!limit.allowed) return rateLimitedResponse(limit.retryAfter);
+
     const prisma = getPrisma();
     const parsed = newsletterSubscriptionSchema.safeParse(await request.json());
 

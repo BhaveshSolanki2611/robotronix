@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Link2, ExternalLink, Share2, Globe, Mail, MapPin, Send, CheckCircle2 } from "lucide-react";
 
@@ -41,19 +42,30 @@ export default function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
+  const [subError, setSubError] = useState("");
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setSubLoading(true);
+    setSubError("");
     try {
-      await fetch("/api/newsletter", {
+      const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Unable to subscribe.");
+      }
+
       setSubscribed(true);
-    } catch { /* silent */ } finally {
+      setEmail("");
+    } catch (error) {
+      setSubError(error instanceof Error ? error.message : "Unable to subscribe.");
+    } finally {
       setSubLoading(false);
     }
   };
@@ -76,9 +88,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <a href="/" className="inline-flex items-center gap-3 group">
-              <img src="/logo.png" alt="RAST" className=" h-[52px] flex items-center justify-center text-[#101a18] bg-white rounded-[6px] p-[2px] drop-shadow-[0_0_12px_rgba(34,211,238,0.45)]"  />
-            </a>
+            <Link href="/" className="inline-flex items-center gap-3 group">
+              <Image src="/logo.png" alt="RAST" width={160} height={52} className="h-[52px] w-auto flex items-center justify-center text-[#101a18] bg-white rounded-[6px] p-[2px] drop-shadow-[0_0_12px_rgba(34,211,238,0.45)]" />
+            </Link>
             <p className="mt-4 text-sm text-text-secondary leading-relaxed">
               Made in India for the World. Patent-granted robotics for hazardous environments.
             </p>
@@ -110,6 +122,7 @@ export default function Footer() {
                   </button>
                 </form>
               )}
+              {subError && <p className="mt-2 text-xs text-red-400">{subError}</p>}
             </div>
           </div>
 

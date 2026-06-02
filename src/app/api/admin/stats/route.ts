@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma } from "@/lib/db";
-import { hasAdminSession, unauthorizedResponse } from "@/lib/adminAuth";
+import { requireAdminSession, unauthorizedResponse } from "@/lib/adminAuth";
 
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
-  if (!hasAdminSession(request)) return unauthorizedResponse();
+  if (!(await requireAdminSession(request, { action: "admin.read_dashboard", resource: "dashboard" }))) {
+    return unauthorizedResponse();
+  }
 
   const prisma = getPrisma();
   const [contactCount, demoCount, careerCount, newsletterCount, recentContacts, recentDemos, recentApplications] = await Promise.all([

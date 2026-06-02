@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma } from "@/lib/db";
-import { hasAdminSession, unauthorizedResponse } from "@/lib/adminAuth";
+import { requireAdminSession, unauthorizedResponse } from "@/lib/adminAuth";
 import { demoRequestSchema, formatValidationError } from "@/lib/apiValidation";
+import { checkRateLimit, publicFormRateLimit, rateLimitedResponse } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
+    const limit = checkRateLimit(request, "demo-form", publicFormRateLimit);
+    if (!limit.allowed) return rateLimitedResponse(limit.retryAfter);
+
     const prisma = getPrisma();
     const parsed = demoRequestSchema.safeParse(await request.json());
 
@@ -26,7 +30,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!hasAdminSession(request)) return unauthorizedResponse();
+  if (!(await requireAdminSession(request, { action: "admin.read_demos", resource: "demos" }))) {
+    return unauthorizedResponse();
+  }
 
   const prisma = getPrisma();
   const demos = await prisma.demoRequest.findMany({

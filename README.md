@@ -19,11 +19,15 @@ Create a local `.env` from `.env.example`.
 
 ```bash
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE"
-ADMIN_SECRET_KEY="replace-with-at-least-32-random-characters"
 NEXT_PUBLIC_SITE_URL="https://www.robotronix.in"
+
+# Only needed when running `npm run admin:create`.
+ADMIN_BOOTSTRAP_EMAIL="admin@example.com"
+ADMIN_BOOTSTRAP_PASSWORD="replace-with-a-long-random-password"
+ADMIN_BOOTSTRAP_NAME="Robotronix Admin"
 ```
 
-`DATABASE_URL` and `ADMIN_SECRET_KEY` are server-only secrets and must not be committed. In production, `ADMIN_SECRET_KEY` must be at least 32 characters.
+`DATABASE_URL` and bootstrap admin credentials are server-only secrets and must not be committed. Rotate the bootstrap password after creating or updating the admin account.
 
 ## Local Development
 
@@ -67,8 +71,9 @@ npm run db:migrate
 The app is ready for Vercel. Configure the project with these production environment variables:
 
 - `DATABASE_URL`
-- `ADMIN_SECRET_KEY`
 - `NEXT_PUBLIC_SITE_URL`
+
+Run `npm run admin:create` locally against the production database when you need to create or rotate the admin account.
 
 Then deploy:
 

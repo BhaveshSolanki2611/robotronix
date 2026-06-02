@@ -1,20 +1,64 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, Download, Loader2, CircleDot, BarChart3 } from "lucide-react";
 import { analyzeImage, type AnalysisResult } from "./analyzeEngine";
+
+const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
 /* ── Main component ───────────────────────────────────────────── */
 export default function TubeAnalyzer() {
   const [preview, setPreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"overlay" | "stats" | "json">("overlay");
   const fileRef = useRef<HTMLInputElement>(null);
+  const objectUrlRef = useRef<string | null>(null);
+
+  const clearPreview = useCallback(() => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+
+    setPreview(null);
+    setResult(null);
+    setError("");
+    setAnalyzing(false);
+
+    if (fileRef.current) {
+      fileRef.current.value = "";
+    }
+  }, []);
 
   const handleFile = useCallback((f: File) => {
+    if (!f.type.startsWith("image/")) {
+      setError("Please upload a valid image file.");
+      return;
+    }
+
+    if (f.size > MAX_IMAGE_BYTES) {
+      setError("Image must be 20MB or smaller.");
+      return;
+    }
+
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+    }
+
     setResult(null);
+    setError("");
     const url = URL.createObjectURL(f);
+    objectUrlRef.current = url;
     setPreview(url);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+    };
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -31,10 +75,20 @@ export default function TubeAnalyzer() {
     img.onload = () => {
       // Use setTimeout to avoid blocking UI
       setTimeout(() => {
-        const res = analyzeImage(img);
-        setResult(res);
-        setAnalyzing(false);
+        try {
+          const res = analyzeImage(img);
+          setResult(res);
+        } catch (analysisError) {
+          console.error("Tube analysis failed:", analysisError);
+          setError("Unable to analyze this image. Please try a different file.");
+        } finally {
+          setAnalyzing(false);
+        }
       }, 100);
+    };
+    img.onerror = () => {
+      setError("Unable to load this image. Please try a different file.");
+      setAnalyzing(false);
     };
     img.src = preview;
   }, [preview]);
@@ -73,6 +127,7 @@ export default function TubeAnalyzer() {
           {/* Left: Upload */}
           <div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} suppressHydrationWarning />
+            {error && <p className="mb-4 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-400">{error}</p>}
             
             {!preview ? (
               <div
@@ -105,7 +160,7 @@ export default function TubeAnalyzer() {
                     {analyzing ? <Loader2 size={14} className="animate-spin" /> : <CircleDot size={14} />}
                     {analyzing ? "Analyzing..." : result ? "Re-Analyze" : "Analyze Image"}
                   </button>
-                  <button onClick={() => { setPreview(null); setResult(null); }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border)" }} suppressHydrationWarning>
+                  <button onClick={clearPreview} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border)" }} suppressHydrationWarning>
                     Clear
                   </button>
                   {result && (

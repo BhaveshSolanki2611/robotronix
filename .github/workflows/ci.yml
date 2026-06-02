@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgresql://user:password@localhost:5432/robotronix
-      ADMIN_SECRET_KEY: ci-admin-secret-with-more-than-32-characters
       NEXT_PUBLIC_SITE_URL: https://www.robotronix.in
     steps:
       - name: Checkout

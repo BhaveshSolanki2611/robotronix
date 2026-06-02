@@ -1,4 +1,5 @@
-import { Target, ChevronDown } from "lucide-react";
+import Image from "next/image";
+import { Target } from "lucide-react";
 
 export const metadata = {
   title: "About Us | RAST",
@@ -62,24 +63,17 @@ const Blog = () => {
 
   // Shuffled duplicates for marquee lines
   const row1 = [...team, ...team];
-  const row2 = [
-    team[2], team[3], team[4], team[5], team[6], team[0], team[1],
-    team[2], team[3], team[4], team[5], team[6], team[0], team[1]
-  ];
-  const row3 = [
-    team[4], team[5], team[6], team[0], team[1], team[2], team[3],
-    team[4], team[5], team[6], team[0], team[1], team[2], team[3]
-  ];
-
   const renderCard = (member: typeof team[0], idx: string) => (
     <div 
       key={idx}
       className="glass-strong w-56 shrink-0 rounded-2xl p-4 border border-border/30 hover:border-accent/40 hover:scale-105 hover:shadow-[0_0_25px_rgba(0,212,255,0.25)] transition-all duration-300 group flex flex-col justify-between bg-[#0B1220] select-none"
     >
       <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-bg-card border border-border/20">
-        <img 
-          src={member.image} 
-          alt={member.name} 
+        <Image
+          src={member.image}
+          alt={member.name}
+          width={224}
+          height={224}
           className="w-full h-full object-cover filter brightness-[0.9] group-hover:brightness-[1] transition-all duration-500 ease-in-out"
         />
       </div>
@@ -102,9 +96,12 @@ const Blog = () => {
       {/* Banner Section with Natural Aspect Ratio (No Cropping) */}
       <div className="relative w-full overflow-hidden border-b border-border/20 bg-bg-primary pt-20">
         <div className="relative z-0 w-full h-auto">
-          <img
+          <Image
             src="/Aboutus.jpeg"
             alt="About Us Banner"
+            width={1920}
+            height={1080}
+            priority
             className="w-full h-auto block filter brightness-[0.8]"
           />
           {/* Subtle gradient overlay to merge into primary background */}
@@ -179,7 +176,7 @@ const Blog = () => {
             </div>
 
             <p className="text-base text-text-secondary leading-relaxed mt-6 pt-6 border-t border-border/20">
-              "Our technologies are designed to operate where traditional inspection methods become expensive, unsafe, time-consuming, or operationally limiting."
+              &quot;Our technologies are designed to operate where traditional inspection methods become expensive, unsafe, time-consuming, or operationally limiting.&quot;
             </p>
           </div>
 
@@ -348,7 +345,7 @@ const Blog = () => {
 
               <div className="mt-8 p-6 rounded-2xl border-l-4 border-accent bg-bg-card/40 border border-border/40">
                 <p className="text-base text-text-primary font-medium italic leading-relaxed text-center md:text-left">
-                  "We are not simply building robots. We are building intelligent systems that help industries see deeper, act faster, operate safer, and make smarter infrastructure decisions."
+                  &quot;We are not simply building robots. We are building intelligent systems that help industries see deeper, act faster, operate safer, and make smarter infrastructure decisions.&quot;
                 </p>
               </div>
 
